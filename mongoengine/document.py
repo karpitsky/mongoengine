@@ -284,14 +284,14 @@ class Document(BaseDocument):
         except pymongo.errors.DuplicateKeyError, err:
             message = u'Tried to save duplicate unique keys (%s)'
             raise NotUniqueError(message % unicode(err))
-        except pymongo.errors.OperationFailure, err:
-            message = 'Could not save document (%s)'
-            if re.match('^E1100[01] duplicate key', unicode(err)):
-                # E11000 - duplicate key error index
-                # E11001 - duplicate key on update
-                message = u'Tried to save duplicate unique keys (%s)'
-                raise NotUniqueError(message % unicode(err))
-            raise OperationError(message % unicode(err))
+        # except pymongo.errors.OperationFailure, err:
+        #     message = 'Could not save document (%s)'
+        #     if re.match('^E1100[01] duplicate key', unicode(err)):
+        #         # E11000 - duplicate key error index
+        #         # E11001 - duplicate key on update
+        #         message = u'Tried to save duplicate unique keys (%s)'
+        #         raise NotUniqueError(message % unicode(err))
+        #     raise OperationError(message % unicode(err))
         id_field = self._meta['id_field']
         if id_field not in self._meta.get('shard_key', []):
             self[id_field] = self._fields[id_field].to_python(object_id)
@@ -379,11 +379,11 @@ class Document(BaseDocument):
         """
         signals.pre_delete.send(self.__class__, document=self)
 
-        try:
-            self._qs.filter(**self._object_key).delete(write_concern=write_concern, _from_doc_delete=True)
-        except pymongo.errors.OperationFailure, err:
-            message = u'Could not delete document (%s)' % err.message
-            raise OperationError(message)
+        # try:
+        self._qs.filter(**self._object_key).delete(write_concern=write_concern, _from_doc_delete=True)
+        # except pymongo.errors.OperationFailure, err:
+        #     message = u'Could not delete document (%s)' % err.message
+        #     raise OperationError(message)
         signals.post_delete.send(self.__class__, document=self)
 
     def switch_db(self, db_alias):

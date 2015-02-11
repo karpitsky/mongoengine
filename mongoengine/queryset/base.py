@@ -305,14 +305,14 @@ class BaseQuerySet(object):
         except pymongo.errors.DuplicateKeyError, err:
             message = 'Could not save document (%s)';
             raise NotUniqueError(message % unicode(err))
-        except pymongo.errors.OperationFailure, err:
-            message = 'Could not save document (%s)';
-            if re.match('^E1100[01] duplicate key', unicode(err)):
-                # E11000 - duplicate key error index
-                # E11001 - duplicate key on update
-                message = u'Tried to save duplicate unique keys (%s)'
-                raise NotUniqueError(message % unicode(err))
-            raise OperationError(message % unicode(err))
+        # except pymongo.errors.OperationFailure, err:
+        #     message = 'Could not save document (%s)';
+        #     if re.match('^E1100[01] duplicate key', unicode(err)):
+        #         # E11000 - duplicate key error index
+        #         # E11001 - duplicate key on update
+        #         message = u'Tried to save duplicate unique keys (%s)'
+        #         raise NotUniqueError(message % unicode(err))
+        #     raise OperationError(message % unicode(err))
 
         if not load_bulk:
             signals.post_bulk_insert.send(
@@ -436,18 +436,18 @@ class BaseQuerySet(object):
                 update["$set"]["_cls"] = queryset._document._class_name
             else:
                 update["$set"] = {"_cls": queryset._document._class_name}
-        try:
-            result = queryset._collection.update(query, update, multi=multi,
-                                                 upsert=upsert, **write_concern)
-            if full_result:
-                return result
-            elif result:
-                return result['n']
-        except pymongo.errors.OperationFailure, err:
-            if unicode(err) == u'multi not coded yet':
-                message = u'update() method requires MongoDB 1.1.3+'
-                raise OperationError(message)
-            raise OperationError(u'Update failed (%s)' % unicode(err))
+        # try:
+        result = queryset._collection.update(query, update, multi=multi,
+                                             upsert=upsert, **write_concern)
+        if full_result:
+            return result
+        elif result:
+            return result['n']
+        # except pymongo.errors.OperationFailure, err:
+        #     if unicode(err) == u'multi not coded yet':
+        #         message = u'update() method requires MongoDB 1.1.3+'
+        #         raise OperationError(message)
+        #     raise OperationError(u'Update failed (%s)' % unicode(err))
 
     def update_one(self, upsert=False, write_concern=None, **update):
         """Perform an atomic update on first field matched by the query.
